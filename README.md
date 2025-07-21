@@ -2,7 +2,6 @@
 
 An interactive web gallery featuring an isometric grid layout with smooth scrolling animations and a modern lightbox viewer.
 
-
 ## Features
 
 - **Isometric Grid Layout**: Visually appealing tilted grid design
