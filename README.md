@@ -2,7 +2,6 @@
 
 An interactive web gallery featuring an isometric grid layout with smooth scrolling animations and a modern lightbox viewer.
 
-![Isometric Grid Gallery](https://github.com/misalagp/imgs/blob/main/noise.png?raw=true)
 
 ## Features
 
