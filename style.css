@@ -104,7 +104,7 @@ a:focus-visible {
 }
 
 /* Main container for the grid */
-.intro {
+.project-gallery {
     width: 100%;
     max-height: 1080px;
     overflow: hidden;
@@ -118,11 +118,11 @@ a:focus-visible {
 /* --- REWRITTEN GRID LOGIC --- */
 
 /* 
- * The Grid Container (.grid)
+ * The Grid Container (.project-gallery__grid)
  * - NO LONGER has width or height. Its size is now determined by its content.
  * - It still acts as the flex container for the rows and the pivot point for the isometric rotation.
  */
-.grid {
+.project-gallery__grid {
     display: flex;
     flex-direction: column;
     gap: 1.5vmin;
@@ -133,12 +133,12 @@ a:focus-visible {
 }
 
 /*
- * The Row Container (.row)
+ * The Row Container (.project-gallery__row)
  * - NOW DEFINES THE WIDTH of the layout. By setting a large viewport-relative width,
  *   we ensure the grid is always wider than the screen, which is necessary for the isometric effect.
  * - It remains a flex container for the items.
  */
-.row {
+.project-gallery__row {
     display: flex;
     gap: 1.5vmin;
     flex-direction: row;
@@ -147,19 +147,19 @@ a:focus-visible {
 }
 
 /*
- * The Image Item Container (.row__item)
+ * The Image Item Container (.project-gallery__item)
  * - flex: 1; allows each item to take up an equal amount of space within the 180vw row.
  * - aspect-ratio: 1 / 1; THIS IS THE KEY CHANGE. It forces the container to be a perfect square.
  *   Its height will always match its dynamically calculated width. This solves the squishing problem.
  */
-.row__item {
+.project-gallery__item {
     position: relative;
     flex: 1;
     min-width: 0;
     
 }
 
-.row__item-inner {
+.project-gallery__item-wrapper {
     position: relative;
     width: auto;
     
@@ -168,12 +168,12 @@ a:focus-visible {
 }
 
 /*
- * The Image Element (.row__item-img)
- * - Its job is to fill the parent container (.row__item-inner) perfectly.
+ * The Image Element (.project-gallery__image)
+ * - Its job is to fill the parent container (.project-gallery__item) perfectly.
  * - object-fit: cover; ensures the image covers the entire square area without distortion,
  *   cropping any excess from the original image.
  */
-.row__item-img {
+.project-gallery__image {
     display: block;
     width: clamp(37.5rem, 33.5351rem + 14.8221vw, 46.875rem);
     height: auto;
@@ -186,7 +186,7 @@ a:focus-visible {
 /* --- END OF REWRITTEN SECTION --- */
 
 
-.enter {
+.project-gallery__enter-button {
     color: rgba(0, 0, 0, 0.8);
     position: absolute;
     text-transform: uppercase;
@@ -206,12 +206,12 @@ a:focus-visible {
     cursor: pointer;
 }
 
-.enter:focus::before,
-.enter:hover::before {
+.project-gallery__enter-button:focus::before,
+.project-gallery__enter-button:hover::before {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
-.fullview {
+.project-gallery__fullview {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -220,12 +220,12 @@ a:focus-visible {
     pointer-events: none;
 }
 
-.fullview .row__item-inner {
+.project-gallery__fullview .project-gallery__item-wrapper {
     border-radius: 0px;
 }
 
 /* Lightbox Gallery Styles (Unchanged) */
-.lightbox {
+.project-gallery-lightbox {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -246,28 +246,28 @@ a:focus-visible {
                 transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.lightbox::backdrop {
+.project-gallery-lightbox::backdrop {
     background: rgba(0, 0, 0, 0) !important;
     backdrop-filter: blur(0px) !important;
     transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
                 backdrop-filter 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.lightbox[open] {
+.project-gallery-lightbox[open] {
     opacity: 1;
     transform: scale(1) translateY(0);
 }
 
-.lightbox[open]::backdrop {
+.project-gallery-lightbox[open]::backdrop {
     background: rgba(0, 0, 0, 0.88) !important;
     backdrop-filter: blur(8px) !important;
 }
 
-.lightbox:not([open]) {
+.project-gallery-lightbox:not([open]) {
     display: none;
 }
 
-.lightbox[open] .lightbox__content {
+.project-gallery-lightbox[open] .project-gallery-lightbox__content {
     animation: contentFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -277,7 +277,7 @@ a:focus-visible {
     100% { opacity: 1; transform: translateY(0); }
 }
 
-.lightbox__content {
+.project-gallery-lightbox__content {
     position: relative;
     width: 100%;
     height: 100%;
@@ -287,7 +287,7 @@ a:focus-visible {
     max-height: 100vh;
 }
 
-.lightbox__header {
+.project-gallery-lightbox__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -295,14 +295,14 @@ a:focus-visible {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.lightbox__title {
+.project-gallery-lightbox__title {
     font-family: "Anton", sans-serif;
     font-size: 1.5rem;
     margin: 0;
     color: white;
 }
 
-.lightbox__close {
+.project-gallery-lightbox__close {
     background: none;
     border: none;
     color: white;
@@ -317,13 +317,13 @@ a:focus-visible {
     transition: background-color 0.3s ease;
 }
 
-.lightbox__close:hover,
-.lightbox__close:focus {
+.project-gallery-lightbox__close:hover,
+.project-gallery-lightbox__close:focus {
     background-color: rgba(255, 255, 255, 0.1);
     outline: none;
 }
 
-.lightbox__carousel {
+.project-gallery-lightbox__carousel {
     flex: 1;
     display: flex;
     align-items: center;
@@ -333,7 +333,7 @@ a:focus-visible {
     padding: 0 100px;
 }
 
-.lightbox__slide {
+.project-gallery-lightbox__slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -349,17 +349,17 @@ a:focus-visible {
     pointer-events: none;
 }
 
-.lightbox__slide.active {
+.project-gallery-lightbox__slide.active {
     opacity: 1;
     transform: translateX(0);
     z-index: 1;
     pointer-events: auto;
 }
 
-.lightbox__slide.slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.lightbox__slide.slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.lightbox__slide.slide-out-right { animation: slideOutRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.lightbox__slide.slide-out-left { animation: slideOutLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.project-gallery-lightbox__slide.slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.project-gallery-lightbox__slide.slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.project-gallery-lightbox__slide.slide-out-right { animation: slideOutRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.project-gallery-lightbox__slide.slide-out-left { animation: slideOutLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
 @keyframes slideInRight {
     from { opacity: 0; transform: translateX(100%); }
@@ -378,7 +378,7 @@ a:focus-visible {
     to { opacity: 0; transform: translateX(-100%); }
 }
 
-.lightbox__image {
+.project-gallery-lightbox__slide-image {
     width: 100%;
     height: auto;
     max-height: 100%;
@@ -388,7 +388,7 @@ a:focus-visible {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.lightbox__nav-btn {
+.project-gallery-lightbox__nav-button {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -409,15 +409,15 @@ a:focus-visible {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.lightbox__nav-btn svg {
+.project-gallery-lightbox__nav-button svg {
     width: 20px;
     height: 20px;
     stroke: rgba(255, 255, 255, 0.9);
     stroke-width: 2.5;
 }
 
-.lightbox__nav-btn:hover,
-.lightbox__nav-btn:focus {
+.project-gallery-lightbox__nav-button:hover,
+.project-gallery-lightbox__nav-button:focus {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.2);
     outline: none;
@@ -426,11 +426,11 @@ a:focus-visible {
     transform: translateY(-50%) scale(1.05);
 }
 
-.lightbox__nav-prev { left: 40px; }
-.lightbox__nav-next { right: 40px; }
+.project-gallery-lightbox__nav-prev { left: 40px; }
+.project-gallery-lightbox__nav-next { right: 40px; }
 
-.lightbox[open] .lightbox__nav-prev { animation: navBtnFadeInLeft 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.lightbox[open] .lightbox__nav-next { animation: navBtnFadeInRight 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.project-gallery-lightbox[open] .project-gallery-lightbox__nav-prev { animation: navBtnFadeInLeft 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.project-gallery-lightbox[open] .project-gallery-lightbox__nav-next { animation: navBtnFadeInRight 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 @keyframes navBtnFadeInLeft {
     from { opacity: 0; transform: translate(-15px, -50%) scale(0.8); }
@@ -441,7 +441,7 @@ a:focus-visible {
     to { opacity: 0.75; transform: translate(0, -50%) scale(1); }
 }
 
-.lightbox__controls {
+.project-gallery-lightbox__controls {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -449,14 +449,14 @@ a:focus-visible {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.lightbox__dots {
+.project-gallery-lightbox__dots {
     display: flex;
     gap: 0.5rem;
     justify-content: center;
     align-items: center;
 }
 
-.lightbox__dot {
+.project-gallery-lightbox__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -471,19 +471,19 @@ a:focus-visible {
     animation: dotEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.lightbox__dot:nth-child(1) { animation-delay: 0.3s; }
-.lightbox__dot:nth-child(2) { animation-delay: 0.35s; }
-.lightbox__dot:nth-child(3) { animation-delay: 0.4s; }
-.lightbox__dot:nth-child(4) { animation-delay: 0.45s; }
-.lightbox__dot:nth-child(5) { animation-delay: 0.5s; }
-.lightbox__dot:nth-child(n+6) { animation-delay: 0.55s; }
+.project-gallery-lightbox__dot:nth-child(1) { animation-delay: 0.3s; }
+.project-gallery-lightbox__dot:nth-child(2) { animation-delay: 0.35s; }
+.project-gallery-lightbox__dot:nth-child(3) { animation-delay: 0.4s; }
+.project-gallery-lightbox__dot:nth-child(4) { animation-delay: 0.45s; }
+.project-gallery-lightbox__dot:nth-child(5) { animation-delay: 0.5s; }
+.project-gallery-lightbox__dot:nth-child(n+6) { animation-delay: 0.55s; }
 
 @keyframes dotEnter {
     from { opacity: 0; transform: scale(0.5); }
     to { opacity: 1; transform: scale(1); }
 }
 
-.lightbox__dot.active {
+.project-gallery-lightbox__dot.active {
     background: rgba(255, 255, 255, 0.9);
     transform: scale(1.2);
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
@@ -491,16 +491,16 @@ a:focus-visible {
 
 /* Media Queries & Scrollbar (Unchanged) */
 @media screen and (max-width: 768px) {
-    .lightbox__header { padding: 0.5rem 1rem; }
-    .lightbox__title { font-size: 1.2rem; }
-    .lightbox__close { font-size: 1.5rem; width: 30px; height: 30px; }
-    .lightbox__carousel { padding: 0 60px; }
-    .lightbox__slide { padding: 1rem 60px; }
-    .lightbox__nav-btn { width: 40px; height: 40px; font-size: 1.5rem; }
-    .lightbox__nav-prev { left: 10px; }
-    .lightbox__nav-next { right: 10px; }
-    .lightbox__controls { padding: 0.5rem 1rem; }
-    .lightbox__dot { width: 8px; height: 8px; }
+    .project-gallery-lightbox__header { padding: 0.5rem 1rem; }
+    .project-gallery-lightbox__title { font-size: 1.2rem; }
+    .project-gallery-lightbox__close { font-size: 1.5rem; width: 30px; height: 30px; }
+    .project-gallery-lightbox__carousel { padding: 0 60px; }
+    .project-gallery-lightbox__slide { padding: 1rem 60px; }
+    .project-gallery-lightbox__nav-button { width: 40px; height: 40px; font-size: 1.5rem; }
+    .project-gallery-lightbox__nav-prev { left: 10px; }
+    .project-gallery-lightbox__nav-next { right: 10px; }
+    .project-gallery-lightbox__controls { padding: 0.5rem 1rem; }
+    .project-gallery-lightbox__dot { width: 8px; height: 8px; }
 }
 
 ::-webkit-scrollbar { height: 13px; }

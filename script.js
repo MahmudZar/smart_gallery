@@ -3,10 +3,10 @@ gsap.registerPlugin(ScrollTrigger);
 document.addEventListener("DOMContentLoaded", function () {
   // Cache DOM elements
   const body = document.body;
-  const enterButton = document.querySelector(".enter");
-  const grid = document.querySelector(".grid");
-  const gridRows = grid.querySelectorAll(".row");
-  const lightbox = document.getElementById("lightbox");
+  const enterButton = document.querySelector(".project-gallery__enter-button");
+  const grid = document.querySelector(".project-gallery__grid");
+  const gridRows = grid.querySelectorAll(".project-gallery__row");
+  const lightbox = document.getElementById("project-gallery-lightbox");
 
   // Cache window size and update on resize
   let winsize = { width: window.innerWidth, height: window.innerHeight };
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Setup scroll trigger for grid animation
   ScrollTrigger.create({
-    trigger: ".intro",
+    trigger: ".project-gallery",
     start: "top bottom",
     end: "bottom top",
     onUpdate: (self) => {
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Collect all images from the grid
   const collectGridImages = () => {
     const images = [];
-    const allImages = grid.querySelectorAll(".row__item-img");
+    const allImages = grid.querySelectorAll(".project-gallery__image");
 
     allImages.forEach((img) => {
       if (img.src) {
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Create lightbox slides
   const createLightboxSlides = () => {
-    const carousel = lightbox.querySelector(".lightbox__carousel");
+    const carousel = lightbox.querySelector(".project-gallery-lightbox__carousel");
     const images = collectGridImages();
 
     if (!carousel) {
@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     images.forEach((imageUrl, index) => {
       const slide = document.createElement("div");
-      slide.className = "lightbox__slide";
+      slide.className = "project-gallery-lightbox__slide";
       
       if (index === 0) {
         slide.classList.add("active");
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
       
       slide.innerHTML = `<img src="${imageUrl}" alt="Gallery image ${
         index + 1
-      }" class="lightbox__image">`;
+      }" class="project-gallery-lightbox__slide-image">`;
       carousel.appendChild(slide);
     });
 
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Create lightbox dots
   const createLightboxDots = (imageCount) => {
-    const dotsContainer = lightbox.querySelector(".lightbox__dots");
+    const dotsContainer = lightbox.querySelector(".project-gallery-lightbox__dots");
 
     if (!dotsContainer) {
       console.error("Dots container not found");
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     for (let i = 0; i < imageCount; i++) {
       const dot = document.createElement("button");
-      dot.className = "lightbox__dot";
+      dot.className = "project-gallery-lightbox__dot";
       if (i === 0) dot.classList.add("active");
       dot.setAttribute("aria-label", `Go to image ${i + 1}`);
       dot.addEventListener("click", () => {
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Update active dot
   const updateActiveDot = (index) => {
-    const dots = lightbox.querySelectorAll(".lightbox__dot");
+    const dots = lightbox.querySelectorAll(".project-gallery-lightbox__dot");
     dots.forEach((dot, i) => {
       dot.classList.toggle("active", i === index);
     });
@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const previousIndex = currentSlideIndex;
     currentSlideIndex = index;
 
-    const lightboxSlides = lightbox.querySelectorAll(".lightbox__slide");
+    const lightboxSlides = lightbox.querySelectorAll(".project-gallery-lightbox__slide");
     
     lightboxSlides.forEach(slide => {
       slide.classList.remove("slide-in-left", "slide-in-right", "slide-out-left", "slide-out-right", "active");
@@ -253,9 +253,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize lightbox controls
   const initLightboxControls = () => {
-    const closeBtn = lightbox.querySelector(".lightbox__close");
-    const prevBtn = lightbox.querySelector(".lightbox__nav-prev");
-    const nextBtn = lightbox.querySelector(".lightbox__nav-next");
+    const closeBtn = lightbox.querySelector(".project-gallery-lightbox__close");
+    const prevBtn = lightbox.querySelector(".project-gallery-lightbox__nav-prev");
+    const nextBtn = lightbox.querySelector(".project-gallery-lightbox__nav-next");
 
     if (closeBtn) closeBtn.addEventListener("click", closeLightbox);
     if (prevBtn) prevBtn.addEventListener("click", prevSlide);
