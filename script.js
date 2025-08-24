@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const grid = document.querySelector(".project-gallery__grid");
   const gridRows = grid.querySelectorAll(".project-gallery__row");
   const lightbox = document.getElementById("project-gallery-lightbox");
+  // Gesture handler instance
+  let gestureHandler = null;
 
   // Cache window size and update on resize
   let winsize = { width: window.innerWidth, height: window.innerHeight };
@@ -208,6 +210,218 @@ document.addEventListener("DOMContentLoaded", function () {
     goToSlide(currentSlideIndex - 1);
   };
 
+  // Gesture handler class for touch/mouse swipe/drag
+  class LightboxGestureHandler {
+    constructor(lightboxElement) {
+      this.lightbox = lightboxElement;
+      this.carousel = lightboxElement.querySelector('.project-gallery-lightbox__carousel');
+      this.isActive = false;
+      this.gestureState = {
+        isGesturing: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        deltaX: 0,
+        startTime: 0,
+      };
+
+      this.config = {
+        touchThreshold: 50,
+        mouseThreshold: 80,
+        maxTime: 300,
+        previewEnabled: true,
+      };
+
+      // Bind handlers once so removeEventListener works
+      this.handleTouchStart = this.handleTouchStart.bind(this);
+      this.handleTouchMove = this.handleTouchMove.bind(this);
+      this.handleTouchEnd = this.handleTouchEnd.bind(this);
+      this.handleMouseDown = this.handleMouseDown.bind(this);
+      this.handleMouseMove = this.handleMouseMove.bind(this);
+      this.handleMouseUp = this.handleMouseUp.bind(this);
+    }
+
+    enable() {
+      if (this.isActive || !this.carousel) return;
+      this.isActive = true;
+      this.attachEventListeners();
+    }
+
+    disable() {
+      if (!this.isActive) return;
+      this.isActive = false;
+      this.removeEventListeners();
+      this.resetGestureState();
+    }
+
+    attachEventListeners() {
+      // Touch events
+      this.carousel.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+      this.carousel.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+      this.carousel.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+
+      // Mouse events
+      this.carousel.addEventListener('mousedown', this.handleMouseDown);
+    }
+
+    removeEventListeners() {
+      if (!this.carousel) return;
+      // Touch events
+      this.carousel.removeEventListener('touchstart', this.handleTouchStart);
+      this.carousel.removeEventListener('touchmove', this.handleTouchMove);
+      this.carousel.removeEventListener('touchend', this.handleTouchEnd);
+      // Mouse events
+      this.carousel.removeEventListener('mousedown', this.handleMouseDown);
+      document.removeEventListener('mousemove', this.handleMouseMove);
+      document.removeEventListener('mouseup', this.handleMouseUp);
+    }
+
+    resetGestureState() {
+      this.gestureState = {
+        isGesturing: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        deltaX: 0,
+        startTime: 0,
+      };
+      this.resetSlidePreview();
+      if (this.lightbox) this.lightbox.style.cursor = '';
+    }
+
+    // Touch handlers
+    handleTouchStart(e) {
+      if (!this.isActive) return;
+      if (e.touches.length !== 1) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.gestureState.isGesturing = true;
+      this.gestureState.startX = touch.clientX;
+      this.gestureState.startY = touch.clientY;
+      this.gestureState.startTime = Date.now();
+    }
+
+    handleTouchMove(e) {
+      if (!this.gestureState.isGesturing || e.touches.length !== 1) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.gestureState.currentX = touch.clientX;
+      this.gestureState.deltaX = this.gestureState.currentX - this.gestureState.startX;
+      const deltaY = touch.clientY - this.gestureState.startY;
+      if (Math.abs(this.gestureState.deltaX) > Math.abs(deltaY)) {
+        this.updateSlidePreview(this.gestureState.deltaX);
+      }
+    }
+
+    handleTouchEnd() {
+      if (!this.gestureState.isGesturing) return;
+      const distance = Math.abs(this.gestureState.deltaX);
+      const duration = Date.now() - this.gestureState.startTime;
+      const isValidSwipe = distance >= this.config.touchThreshold && duration <= this.config.maxTime;
+      if (isValidSwipe) {
+        const slides = this.lightbox.querySelectorAll('.project-gallery-lightbox__slide');
+        const activeIndex = Array.from(slides).findIndex(s => s.classList.contains('active'));
+        if (this.gestureState.deltaX > 0) {
+          // Swipe right -> previous, block if at first
+          if (activeIndex > 0) prevSlide();
+        } else {
+          // Swipe left -> next, block if at last
+          if (activeIndex < slides.length - 1) nextSlide();
+        }
+      }
+      this.resetGestureState();
+    }
+
+    // Mouse handlers
+    handleMouseDown(e) {
+      if (!this.isActive) return;
+      if (e.button !== 0) return;
+      e.preventDefault();
+      this.gestureState.isGesturing = true;
+      this.gestureState.startX = e.clientX;
+      this.gestureState.startTime = Date.now();
+      document.addEventListener('mousemove', this.handleMouseMove);
+      document.addEventListener('mouseup', this.handleMouseUp);
+      if (this.lightbox) this.lightbox.style.cursor = 'grabbing';
+    }
+
+    handleMouseMove(e) {
+      if (!this.gestureState.isGesturing) return;
+      this.gestureState.currentX = e.clientX;
+      this.gestureState.deltaX = this.gestureState.currentX - this.gestureState.startX;
+      this.updateSlidePreview(this.gestureState.deltaX);
+    }
+
+    handleMouseUp() {
+      if (!this.gestureState.isGesturing) return;
+      const distance = Math.abs(this.gestureState.deltaX);
+      const duration = Date.now() - this.gestureState.startTime;
+      const isValidDrag = distance >= this.config.mouseThreshold && duration <= this.config.maxTime;
+      if (isValidDrag) {
+        const slides = this.lightbox.querySelectorAll('.project-gallery-lightbox__slide');
+        const activeIndex = Array.from(slides).findIndex(s => s.classList.contains('active'));
+        if (this.gestureState.deltaX > 0) {
+          // Drag right -> previous, block if at first
+          if (activeIndex > 0) prevSlide();
+        } else {
+          // Drag left -> next, block if at last
+          if (activeIndex < slides.length - 1) nextSlide();
+        }
+      }
+      document.removeEventListener('mousemove', this.handleMouseMove);
+      document.removeEventListener('mouseup', this.handleMouseUp);
+      this.resetGestureState();
+    }
+
+    // Visual feedback
+    updateSlidePreview(deltaX) {
+      if (!this.config.previewEnabled) return;
+      const currentSlide = this.lightbox.querySelector('.project-gallery-lightbox__slide.active');
+      if (!currentSlide) return;
+      const progress = deltaX / window.innerWidth;
+      const absProgress = Math.abs(progress);
+      gsap.set(currentSlide, { x: deltaX, scale: 1 - absProgress * 0.1, duration: 0 });
+      this.showAdjacentSlidePreview(deltaX, absProgress);
+    }
+
+    showAdjacentSlidePreview(deltaX, absProgress) {
+      const slides = this.lightbox.querySelectorAll('.project-gallery-lightbox__slide');
+      const activeIndex = Array.from(slides).findIndex(s => s.classList.contains('active'));
+      let adjacentSlide = null;
+      if (deltaX > 0 && activeIndex > 0) {
+        adjacentSlide = slides[activeIndex - 1];
+      } else if (deltaX < 0 && activeIndex < slides.length - 1) {
+        adjacentSlide = slides[activeIndex + 1];
+      }
+      if (adjacentSlide) {
+        const slideWidth = this.carousel.offsetWidth;
+        const offset = deltaX > 0 ? -slideWidth : slideWidth;
+        gsap.set(adjacentSlide, { x: offset + deltaX, opacity: absProgress, scale: 0.9 + absProgress * 0.1, duration: 0 });
+      }
+    }
+
+    resetSlidePreview() {
+      const currentSlide = this.lightbox.querySelector('.project-gallery-lightbox__slide.active');
+      if (currentSlide) {
+        gsap.set(currentSlide, { x: 0, scale: 1, duration: 0.3 });
+      }
+      const allSlides = this.lightbox.querySelectorAll('.project-gallery-lightbox__slide');
+      allSlides.forEach(slide => {
+        if (!slide.classList.contains('active')) {
+          gsap.set(slide, { x: 0, opacity: 0, scale: 1, duration: 0.3 });
+        }
+      });
+    }
+
+    destroy() {
+      this.disable();
+      this.lightbox = null;
+      this.carousel = null;
+      this.gestureState = null;
+      this.config = null;
+    }
+  }
+
   // Open lightbox
   const openLightbox = () => {
     scrollPosition = window.scrollY || document.documentElement.scrollTop;
@@ -223,6 +437,10 @@ document.addEventListener("DOMContentLoaded", function () {
     goToSlide(0);
 
     document.addEventListener("keydown", handleKeyDown);
+    // Enable gesture navigation
+    if (gestureHandler) {
+      gestureHandler.enable();
+    }
   };
 
   // Close lightbox
@@ -234,6 +452,10 @@ document.addEventListener("DOMContentLoaded", function () {
     window.scrollTo(0, scrollPosition);
 
     document.removeEventListener("keydown", handleKeyDown);
+    // Disable gesture navigation
+    if (gestureHandler) {
+      gestureHandler.disable();
+    }
   };
 
   // Handle keyboard navigation
@@ -289,6 +511,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (lightbox) {
       initLightboxControls();
+      // Initialize gesture handler
+      gestureHandler = new LightboxGestureHandler(lightbox);
     }
 
     renderScrollAnimation();

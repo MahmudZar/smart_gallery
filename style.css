@@ -331,6 +331,19 @@ a:focus-visible {
     position: relative;
     overflow: hidden;
     padding: 0 100px;
+    /* Allow vertical scrolling, prevent UA from hijacking horizontal gestures */
+    touch-action: pan-y;
+    cursor: grab;
+}
+
+.project-gallery-lightbox__carousel:active {
+    cursor: grabbing;
+}
+
+/* Prevent text/image selection during drag */
+.project-gallery-lightbox__carousel * {
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .project-gallery-lightbox__slide {
@@ -347,6 +360,8 @@ a:focus-visible {
                 transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     padding: 2rem 100px;
     pointer-events: none;
+    /* Enable hardware acceleration for gesture moves */
+    will-change: transform;
 }
 
 .project-gallery-lightbox__slide.active {
