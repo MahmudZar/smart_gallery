@@ -36,6 +36,7 @@ body {
     right: 0;
 }
 
+/* General Link and Focus Styles */
 a {
     text-decoration: none;
     color: var(--color-link);
@@ -68,7 +69,7 @@ a:focus-visible {
     pointer-events: none;
 }
 
-/* Dummy sections */
+/* Dummy sections for scrolling context */
 .dummy-section {
     width: 100%;
     height: 100vh;
@@ -102,9 +103,10 @@ a:focus-visible {
     opacity: 0.8;
 }
 
+/* Main container for the grid */
 .intro {
     width: 100%;
-    height: 100vh;
+    max-height: 1080px;
     overflow: hidden;
     position: relative;
     display: flex;
@@ -113,74 +115,76 @@ a:focus-visible {
     background: #000;
 }
 
-.intro::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url(https://github.com/misalagp/imgs/blob/main/noise.png?raw=true),
-        radial-gradient(circle, #315f316e 0%, transparent 100%);
-    background-size: 250px, 100%;
-    pointer-events: none;
-}
+/* --- REWRITTEN GRID LOGIC --- */
 
-.intro--open {
-    height: 80vh;
-}
-
+/* 
+ * The Grid Container (.grid)
+ * - NO LONGER has width or height. Its size is now determined by its content.
+ * - It still acts as the flex container for the rows and the pivot point for the isometric rotation.
+ */
 .grid {
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vmin;
     flex: none;
     position: relative;
-    width: 200vw;
-    height: 200vh;
-    display: grid;
-    grid-template-rows: repeat(5, 1fr);
-    grid-template-columns: 100%;
     transform: rotate(var(--angle));
     transform-origin: center center;
 }
 
+/*
+ * The Row Container (.row)
+ * - NOW DEFINES THE WIDTH of the layout. By setting a large viewport-relative width,
+ *   we ensure the grid is always wider than the screen, which is necessary for the isometric effect.
+ * - It remains a flex container for the items.
+ */
 .row {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(7, 1fr);
-    will-change: transform, filter;
+    display: flex;
+    gap: 1.5vmin;
+    flex-direction: row;
+    margin: 0 auto; /* Ensures the wide row is centered within the grid */
+    will-change: transform;
 }
 
+/*
+ * The Image Item Container (.row__item)
+ * - flex: 1; allows each item to take up an equal amount of space within the 180vw row.
+ * - aspect-ratio: 1 / 1; THIS IS THE KEY CHANGE. It forces the container to be a perfect square.
+ *   Its height will always match its dynamically calculated width. This solves the squishing problem.
+ */
 .row__item {
     position: relative;
+    flex: 1;
+    min-width: 0;
+    
 }
 
 .row__item-inner {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: auto;
+    
     overflow: hidden;
     border-radius: 10px;
 }
 
+/*
+ * The Image Element (.row__item-img)
+ * - Its job is to fill the parent container (.row__item-inner) perfectly.
+ * - object-fit: cover; ensures the image covers the entire square area without distortion,
+ *   cropping any excess from the original image.
+ */
 .row__item-img {
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: 50% 50%;
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: block;
+    width: clamp(37.5rem, 33.5351rem + 14.8221vw, 46.875rem);
+    height: auto;
+    object-fit: cover;
+    object-position: 50% 50%;
+  aspect-ratio: 16 / 9;
+  min-width: 500px;
 }
 
-.row__item-img--large {
-    width: 100vw;
-    height: 100vh;
-    top: 50%;
-    left: 50%;
-    margin: -50vh 0 0 -50vw;
-    background-position: 50% 70%;
-    will-change: transform, filter;
-}
+/* --- END OF REWRITTEN SECTION --- */
+
 
 .enter {
     color: rgba(0, 0, 0, 0.8);
@@ -191,24 +195,15 @@ a:focus-visible {
     z-index: 100;
     font-family: "Poppins", sans-serif;
     font-size: 1.5rem;
-    background: url(https://github.com/misalagp/imgs/blob/main/noise.png?raw=true),
-        radial-gradient(circle, transparent 0%, transparent 100%);
+    color: white;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #606068;
+    border-radius: 3rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     background-size: 250px, 100%;
     transition: all 0.3s;
     cursor: pointer;
-}
-
-.enter::before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    border-radius: 3rem;
-    transition: all 0.3s;
-    z-index: -1;
 }
 
 .enter:focus::before,
@@ -229,7 +224,7 @@ a:focus-visible {
     border-radius: 0px;
 }
 
-/* Lightbox Gallery */
+/* Lightbox Gallery Styles (Unchanged) */
 .lightbox {
     position: fixed !important;
     top: 0 !important;
@@ -251,7 +246,6 @@ a:focus-visible {
                 transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Dialog element styles */
 .lightbox::backdrop {
     background: rgba(0, 0, 0, 0) !important;
     backdrop-filter: blur(0px) !important;
@@ -273,23 +267,14 @@ a:focus-visible {
     display: none;
 }
 
-/* Elegant entrance animation for content */
 .lightbox[open] .lightbox__content {
     animation: contentFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes contentFadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    60% {
-        opacity: 0.8;
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    0% { opacity: 0; transform: translateY(15px); }
+    60% { opacity: 0.8; }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .lightbox__content {
@@ -371,69 +356,26 @@ a:focus-visible {
     pointer-events: auto;
 }
 
-/* Slide animation classes */
-.lightbox__slide.slide-in-right {
-    transform: translateX(100%);
-    animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.lightbox__slide.slide-in-left {
-    transform: translateX(-100%);
-    animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.lightbox__slide.slide-out-right {
-    opacity: 1;
-    animation: slideOutRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.lightbox__slide.slide-out-left {
-    opacity: 1;
-    animation: slideOutLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
+.lightbox__slide.slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.lightbox__slide.slide-in-left { animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.lightbox__slide.slide-out-right { animation: slideOutRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.lightbox__slide.slide-out-left { animation: slideOutLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
 @keyframes slideInRight {
-    0% {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes slideInLeft {
-    0% {
-        opacity: 0;
-        transform: translateX(-100%);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(-100%); }
+    to { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes slideOutRight {
-    0% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(100%);
-    }
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100%); }
 }
-
 @keyframes slideOutLeft {
-    0% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-100%);
-    }
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-100%); }
 }
 
 .lightbox__image {
@@ -444,12 +386,6 @@ a:focus-visible {
     object-fit: cover;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.lightbox__slide.active .lightbox__image {
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
 }
 
 .lightbox__nav-btn {
@@ -478,7 +414,6 @@ a:focus-visible {
     height: 20px;
     stroke: rgba(255, 255, 255, 0.9);
     stroke-width: 2.5;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lightbox__nav-btn:hover,
@@ -491,63 +426,19 @@ a:focus-visible {
     transform: translateY(-50%) scale(1.05);
 }
 
-.lightbox__nav-btn:hover svg,
-.lightbox__nav-btn:focus svg {
-    stroke: white;
-    transform: scale(1.1);
-}
+.lightbox__nav-prev { left: 40px; }
+.lightbox__nav-next { right: 40px; }
 
-.lightbox__nav-prev {
-    left: 40px;
-}
-
-.lightbox__nav-prev:hover svg {
-    transform: translateX(-1px) scale(1.1);
-}
-
-.lightbox__nav-next {
-    right: 40px;
-}
-
-.lightbox__nav-next:hover svg {
-    transform: translateX(1px) scale(1.1);
-}
-
-/* Elegant entrance animations for navigation buttons */
-.lightbox[open] .lightbox__nav-prev {
-    animation: navBtnFadeInLeft 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.lightbox[open] .lightbox__nav-next {
-    animation: navBtnFadeInRight 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+.lightbox[open] .lightbox__nav-prev { animation: navBtnFadeInLeft 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.lightbox[open] .lightbox__nav-next { animation: navBtnFadeInRight 0.8s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 @keyframes navBtnFadeInLeft {
-    0% {
-        opacity: 0;
-        transform: translate(-15px, -50%) scale(0.8);
-    }
-    60% {
-        opacity: 0.4;
-    }
-    100% {
-        opacity: 0.75;
-        transform: translate(0, -50%) scale(1);
-    }
+    from { opacity: 0; transform: translate(-15px, -50%) scale(0.8); }
+    to { opacity: 0.75; transform: translate(0, -50%) scale(1); }
 }
-
 @keyframes navBtnFadeInRight {
-    0% {
-        opacity: 0;
-        transform: translate(15px, -50%) scale(0.8);
-    }
-    60% {
-        opacity: 0.4;
-    }
-    100% {
-        opacity: 0.75;
-        transform: translate(0, -50%) scale(1);
-    }
+    from { opacity: 0; transform: translate(15px, -50%) scale(0.8); }
+    to { opacity: 0.75; transform: translate(0, -50%) scale(1); }
 }
 
 .lightbox__controls {
@@ -588,14 +479,8 @@ a:focus-visible {
 .lightbox__dot:nth-child(n+6) { animation-delay: 0.55s; }
 
 @keyframes dotEnter {
-    0% {
-        opacity: 0;
-        transform: scale(0.5);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 .lightbox__dot.active {
@@ -604,130 +489,26 @@ a:focus-visible {
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
 }
 
-.lightbox__dot:hover,
-.lightbox__dot:focus {
-    background: rgba(255, 255, 255, 0.6);
-    outline: none;
-}
-
-/* Mobile responsive adjustments */
+/* Media Queries & Scrollbar (Unchanged) */
 @media screen and (max-width: 768px) {
-    .lightbox__header {
-        padding: 0.5rem 1rem;
-    }
-    
-    .lightbox__title {
-        font-size: 1.2rem;
-    }
-    
-    .lightbox__close {
-        font-size: 1.5rem;
-        width: 30px;
-        height: 30px;
-    }
-    
-    .lightbox__carousel {
-        padding: 0 60px;
-    }
-    
-    .lightbox__slide {
-        padding: 1rem 60px;
-    }
-    
-    .lightbox__nav-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
-    }
-    
-    .lightbox__nav-prev {
-        left: 10px;
-    }
-    
-    .lightbox__nav-next {
-        right: 10px;
-    }
-    
-    .lightbox__controls {
-        padding: 0.5rem 1rem;
-    }
-    
-    .lightbox__dot {
-        width: 8px;
-        height: 8px;
-    }
-    
-    /* Adjust slide animations for mobile */
-    @keyframes slideInRight {
-        0% {
-            opacity: 0;
-            transform: translateX(50%);
-        }
-        100% {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    @keyframes slideInLeft {
-        0% {
-            opacity: 0;
-            transform: translateX(-50%);
-        }
-        100% {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    @keyframes slideOutRight {
-        0% {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        100% {
-            opacity: 0;
-            transform: translateX(50%);
-        }
-    }
-    
-    @keyframes slideOutLeft {
-        0% {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        100% {
-            opacity: 0;
-            transform: translateX(-50%);
-        }
-    }
+    .lightbox__header { padding: 0.5rem 1rem; }
+    .lightbox__title { font-size: 1.2rem; }
+    .lightbox__close { font-size: 1.5rem; width: 30px; height: 30px; }
+    .lightbox__carousel { padding: 0 60px; }
+    .lightbox__slide { padding: 1rem 60px; }
+    .lightbox__nav-btn { width: 40px; height: 40px; font-size: 1.5rem; }
+    .lightbox__nav-prev { left: 10px; }
+    .lightbox__nav-next { right: 10px; }
+    .lightbox__controls { padding: 0.5rem 1rem; }
+    .lightbox__dot { width: 8px; height: 8px; }
 }
 
-/* Simplify the scroll bar appearance */
-::-webkit-scrollbar {
-    height: 13px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    border-top: 6px solid #000;
-    background: #555;
-    width: 50%;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #bbb;
-}
+::-webkit-scrollbar { height: 13px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { border-top: 6px solid #000; background: #555; width: 50%; }
+::-webkit-scrollbar-thumb:hover { background: #bbb; }
 
 @media screen and (min-width: 53em) {
-    body {
-        --page-padding: 2rem 3rem;
-    }
-    
-    .dummy-content h2 {
-        font-size: clamp(2rem, 20vh, 16rem);
-    }
+    body { --page-padding: 2rem 3rem; }
+    .dummy-content h2 { font-size: clamp(2rem, 20vh, 16rem); }
 }

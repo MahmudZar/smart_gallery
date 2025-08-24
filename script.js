@@ -17,24 +17,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // Configuration for enabling/disabling animations
   const config = {
     translateX: true,
-    contrast: true,
-    brightness: true,
   };
 
   // Total number of rows
   const numRows = gridRows.length;
   const middleRowIndex = Math.floor(numRows / 2);
-  const middleRow = gridRows[middleRowIndex];
-  const middleRowItems = middleRow.querySelectorAll(".row__item");
-  const numRowItems = middleRowItems.length;
-  const middleRowItemIndex = Math.floor(numRowItems / 2);
-  const middleRowItemInner =
-    middleRowItems[middleRowItemIndex].querySelector(".row__item-inner");
-  const middleRowItemInnerImage =
-    middleRowItemInner.querySelector(".row__item-img");
-
-  // Setting the final size of the middle image for the reveal effect
-  middleRowItemInnerImage.classList.add("row__item-img--large");
 
   // Initialize rendered styles for each row
   const baseAmt = 0.1;
@@ -46,8 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let style = { amt };
     if (config.translateX) style.translateX = { previous: 0, current: 0 };
-    if (config.contrast) style.contrast = { previous: 100, current: 100 };
-    if (config.brightness) style.brightness = { previous: 100, current: 100 };
 
     return style;
   });
@@ -63,30 +48,10 @@ document.addEventListener("DOMContentLoaded", function () {
     return ((scrollProgress * 2 - 1) * 40 * winsize.width) / 100;
   };
 
-  // Map scroll progress to contrast range
-  const calculateScrollMappedContrast = () => {
-    const centerContrast = 100;
-    const edgeContrast = 330;
-    const t = Math.abs(scrollProgress * 2 - 1);
-    const factor = Math.pow(t, 2);
-    return centerContrast - factor * (centerContrast - edgeContrast);
-  };
-
-  // Map scroll progress to brightness range
-  const calculateScrollMappedBrightness = () => {
-    const centerBrightness = 100;
-    const edgeBrightness = 15;
-    const t = Math.abs(scrollProgress * 2 - 1);
-    const factor = Math.pow(t, 2);
-    return centerBrightness - factor * (centerBrightness - edgeBrightness);
-  };
-
   // Render function for scroll-based animation
   const renderScrollAnimation = () => {
     const mappedValues = {
       translateX: calculateScrollMappedX(),
-      contrast: calculateScrollMappedContrast(),
-      brightness: calculateScrollMappedBrightness(),
     };
 
     gridRows.forEach((row, index) => {
@@ -106,13 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       let gsapSettings = {};
       if (config.translateX) gsapSettings.x = style.translateX.previous;
-      if (config.contrast)
-        gsapSettings.filter = `contrast(${style.contrast.previous}%)`;
-      if (config.brightness) {
-        gsapSettings.filter = `${
-          gsapSettings.filter ? gsapSettings.filter + " " : ""
-        }brightness(${style.brightness.previous}%)`;
-      }
 
       gsap.set(row, gsapSettings);
     });
@@ -140,10 +98,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const allImages = grid.querySelectorAll(".row__item-img");
 
     allImages.forEach((img) => {
-      const bgImage = img.style.backgroundImage;
-      if (bgImage) {
-        const url = bgImage.slice(4, -1).replace(/"/g, "");
-        images.push(url);
+      if (img.src) {
+        images.push(img.src);
       }
     });
 
@@ -166,11 +122,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const slide = document.createElement("div");
       slide.className = "lightbox__slide";
       
-      // Set initial slide position
       if (index === 0) {
         slide.classList.add("active");
       } else {
-        // Position other slides off-screen to the right
         slide.style.transform = "translateX(100%)";
       }
       
@@ -218,28 +172,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const goToSlide = (index) => {
     if (slides.length === 0) return;
 
-    // Ensure index is within bounds
     index = (index + slides.length) % slides.length;
     
-    // Don't do anything if we're already on this slide
     if (index === currentSlideIndex) return;
 
-    // Determine slide direction (left or right)
     const direction = index > currentSlideIndex ? 'next' : 'prev';
     
-    // Update current index
     const previousIndex = currentSlideIndex;
     currentSlideIndex = index;
 
-    // Update slides with slide animation
     const lightboxSlides = lightbox.querySelectorAll(".lightbox__slide");
     
-    // Remove any existing transition classes
     lightboxSlides.forEach(slide => {
       slide.classList.remove("slide-in-left", "slide-in-right", "slide-out-left", "slide-out-right", "active");
     });
     
-    // Apply appropriate slide classes based on direction
     if (lightboxSlides[previousIndex]) {
       lightboxSlides[previousIndex].classList.add(direction === 'next' ? 'slide-out-left' : 'slide-out-right');
     }
@@ -248,7 +195,6 @@ document.addEventListener("DOMContentLoaded", function () {
       lightboxSlides[index].classList.add('active', direction === 'next' ? 'slide-in-right' : 'slide-in-left');
     }
 
-    // Update dots
     updateActiveDot(index);
   };
 
@@ -264,38 +210,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Open lightbox
   const openLightbox = () => {
-    // Save current scroll position
     scrollPosition = window.scrollY || document.documentElement.scrollTop;
 
-    // Create lightbox content
     slides = createLightboxSlides();
     createLightboxDots(slides.length);
 
-    // Show lightbox
     lightbox.showModal();
 
-    // Disable scrolling
     body.classList.add("noscroll");
     body.style.top = `-${scrollPosition}px`;
 
-    // Set initial slide
     goToSlide(0);
 
-    // Add keyboard navigation
     document.addEventListener("keydown", handleKeyDown);
   };
 
   // Close lightbox
   const closeLightbox = () => {
-    // Hide lightbox
     lightbox.close();
 
-    // Enable scrolling and restore position
     body.classList.remove("noscroll");
     body.style.top = "";
     window.scrollTo(0, scrollPosition);
 
-    // Remove keyboard navigation
     document.removeEventListener("keydown", handleKeyDown);
   };
 
@@ -324,7 +261,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (prevBtn) prevBtn.addEventListener("click", prevSlide);
     if (nextBtn) nextBtn.addEventListener("click", nextSlide);
 
-    // Close on backdrop click (for browsers that support it)
     lightbox.addEventListener("click", (e) => {
       if (e.target === lightbox) {
         closeLightbox();
@@ -334,7 +270,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize smooth scrolling
   const initSmoothScrolling = () => {
-    // Check if Lenis is available
     if (typeof Lenis === 'function') {
       const lenis = new Lenis({ lerp: 0.15 });
       gsap.ticker.add((time) => {
@@ -348,23 +283,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize everything
   const init = () => {
-    // Initialize click event for the "Explore" button
     if (enterButton) {
       enterButton.addEventListener("click", openLightbox);
     }
 
-    // Initialize lightbox controls
     if (lightbox) {
       initLightboxControls();
     }
 
-    // Start initial render
     renderScrollAnimation();
   };
 
-  // Activate smooth scrolling
   initSmoothScrolling();
-
-  // Call initialization
   init();
 });
